@@ -607,6 +607,17 @@
 
 .define INTERACID_50			$50 ; stub
 
+; An old man NPC. Note: INTERACID_OLD_MAN_WITH_RUPEES uses the same sprites.
+; Subid:
+;   00: Old man who takes a secret to give you the shield (same spot as subid $02)
+;   01: Old man who gives you book of seals
+;   02: Old man guarding fairy powder in past (same spot as subid $00)
+;   03:
+;   04:
+;   05:
+;   06:
+.define INTERACID_OLD_MAN		$52
+
 ; Explosion animation; no collisions.
 ;   var03: if set, it has a higher draw priority?
 .define INTERACID_EXPLOSION		$56

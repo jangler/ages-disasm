@@ -3233,15 +3233,23 @@ script15_5d0f:
 	enableinput
 	jump2byte script15_5cd3
 
+
+; ==============================================================================
+; INTERACID_LIBRARY_NPC
+; ==============================================================================
+
+;;
+; @addr{5d15}
+oldManGiveShieldUpgradoToLink:
 	ld a,TREASURE_SHIELD		; $5d15
 	call checkTreasureObtained		; $5d17
-	jr c,_label_15_095	; $5d1a
+	jr c,+			; $5d1a
 	ld a,(wShieldLevel)		; $5d1c
-_label_15_095:
++
 	cp $03			; $5d1f
-	jr c,_label_15_096	; $5d21
+	jr c,+			; $5d21
 	ld a,$02		; $5d23
-_label_15_096:
++
 	ld c,a			; $5d25
 	call getFreeInteractionSlot		; $5d26
 	ret nz			; $5d29
@@ -3255,71 +3263,93 @@ _label_15_096:
 	call objectCopyPosition_rawAddress		; $5d35
 	pop de			; $5d38
 	ret			; $5d39
-	ld hl,$5d45		; $5d3a
+
+;;
+; @addr{5d3a}
+oldManWarpLinkToLibrary:
+	ld hl,@warpDest		; $5d3a
 	call setWarpDestVariables		; $5d3d
 	ld a,SND_TELEPORT		; $5d40
 	jp playSound		; $5d42
-	add l			; $5d45
-.DB $ec				; $5d46
-	nop			; $5d47
-	rla			; $5d48
-	inc bc			; $5d49
+
+@warpDest:
+	.db $85 $ec $00 $17 $03
+
+;;
+; @addr{5d4a}
+oldManSetAnimationToVar38:
 	ld e,$78		; $5d4a
 _label_15_097:
 	ld a,(de)		; $5d4c
 	jp interactionSetAnimation		; $5d4d
 
-; @addr{5d50}
-script15_5d50:
-	jumpifglobalflagset $14 script15_5d55
+
+; Subid $00: Old man who takes a secret to give you the shield (same spot as subid $02)
+libraryNpcScript_givesShieldUpgrade:
+	jumpifglobalflagset GLOBALFLAG_FINISHEDGAME, ++
 	scriptend
-script15_5d55:
+++
 	initcollisions
 	checkabutton
 	disableinput
-	jumpifglobalflagset $72 script15_5d8e
-	showtext $3310
+	jumpifglobalflagset GLOBALFLAG_72, @alreadyToldSecret
+
+	; Ask if Link has a secret to tell
+	showtext TX_3310
 	wait 30
-	jumpiftextoptioneq $00 script15_5d69
-	showtext $3311
-	jump2byte script15_5d93
-script15_5d69:
+
+	jumpiftextoptioneq $00, @promptForSecret
+
+	; Said "no"
+	showtext TX_3311
+	jump2byte @warpLinkOut
+
+@promptForSecret:
 	askforsecret $04
 	wait 30
-	jumpifmemoryeq $cc89 $00 script15_5d77
-	showtext $3311
-	jump2byte script15_5d93
-script15_5d77:
-	setglobalflag $68
-	showtext $3312
+	jumpifmemoryeq wTextInputResult, $00, @validSecret
+
+	; Invalid secret
+	showtext TX_3311
+	jump2byte @warpLinkOut
+
+@validSecret:
+	setglobalflag GLOBALFLAG_68
+	showtext TX_3312
 	wait 30
-	callscript script518b ; TODO
+	callscript scriptFunc_doEnergySwirlCutscene
 	wait 30
-	asm15 $5d15
+	asm15 oldManGiveShieldUpgradoToLink
 	wait 30
-	setglobalflag $72
+
+	setglobalflag GLOBALFLAG_72
 	generatesecret $04
-	showtext $3313
-	jump2byte script15_5d93
-script15_5d8e:
+	showtext TX_3313
+	jump2byte @warpLinkOut
+
+@alreadyToldSecret:
 	generatesecret $04
-	showtext $3314
-script15_5d93:
+	showtext TX_3314
+
+@warpLinkOut:
 	wait 30
-	asm15 $5d3a
+	asm15 oldManWarpLinkToLibrary
 	enableinput
-script15_5d98:
+@wait:
 	wait 1
-	jump2byte script15_5d98
-script15_5d9b:
+	jump2byte @wait
+
+
+; Subid $01: Old man who gives you book of seals
+libraryNpcScript_givesBookOfSeals:
 	initcollisions
 script15_5d9c:
 	enableinput
 	checkabutton
 	disableinput
-	jumpifroomflagset $20 script15_5dc0
-	showtext $3308
-	jumpifglobalflagset $20 script15_5dac
+	jumpifroomflagset $20, script15_5dc0
+	showtext TX_3308
+	jumpifglobalflagset GLOBALFLAG_TALKED_TO_OCTOROK_FAIRY, script15_5dac
 	jump2byte script15_5d9c
 script15_5dac:
 	wait 30
@@ -3337,26 +3367,35 @@ script15_5dac:
 script15_5dc0:
 	showtext $330a
 	jump2byte script15_5d9c
-script15_5dc5:
+
+
+; Subid $02: Old man guarding fairy powder in past (same spot as subid $00)
+libraryNpcScript_givesFairyPowder:
 	initcollisions
 	checkabutton
-	jumpifroomflagset $20 script15_5de2
+	jumpifroomflagset $20, @alreadyGaveFairyPowder
+
 	disableinput
-	showtext $330b
+	showtext TX_330b
+
 	setangleandanimation $00
 	wait 30
+
 	orroomflag $20
 	setangleandanimation $10
 	wait 30
-	giveitem $5100
+
+	giveitem TREASURE_FAIRY_POWDER, $00
 	wait 1
 	checktext
-	showtext $330c
+
+	showtext TX_330c
 	checktext
 	enablemenu
 	scriptend
-script15_5de2:
-	showtext $330d
+
+@alreadyGaveFairyPowder:
+	showtext TX_330d
 	checktext
 	scriptend
 

@@ -93713,115 +93713,150 @@ _label_09_201:
 
 
 interactionCode52:
-	ld e,$42		; $65d9
+	ld e,Interaction.subid		; $65d9
 	ld a,(de)		; $65db
 	rst_jumpTable			; $65dc
-.dw $65eb
-.dw $65fc
-.dw $660b
-.dw $6632
-.dw $6632
-.dw $6632
-.dw $6632
+	.dw @runSubid00
+	.dw @runSubid01
+	.dw @runSubid02
+	.dw @runSubid03
+	.dw @runSubid04
+	.dw @runSubid05
+	.dw @runSubid06
+
+@runSubid00:
 	call checkInteractionState		; $65eb
-	jr nz,_label_09_202	; $65ee
-	call $66a3		; $65f0
-_label_09_202:
+	jr nz,@@state1	; $65ee
+
+
+; Old man who takes a secret to give you the shield (same spot as subid $02)
+@@state0:
+	call @loadScriptAndInitGraphics		; $65f0
+@@state1:
 	call interactionRunScript		; $65f3
 	jp c,interactionDelete		; $65f6
 	jp npcFaceLinkAndAnimate		; $65f9
+
+
+; Old man who gives you book of seals
+@runSubid01:
 	call checkInteractionState		; $65fc
-	call z,$66a3		; $65ff
+	call z,@loadScriptAndInitGraphics		; $65ff
 	call interactionRunScript		; $6602
 	jp c,interactionDelete		; $6605
 	jp npcAnimate		; $6608
+
+
+; Old man guarding fairy powder in past (same spot as subid $00)
+@runSubid02:
 	call checkInteractionState		; $660b
-	jr nz,_label_09_203	; $660e
+	jr nz,@@state1		; $660e
+
+@@state0:
 	ld a,GLOBALFLAG_FINISHEDGAME		; $6610
 	call checkGlobalFlag		; $6612
 	jp nz,interactionDelete		; $6615
-	call $66a3		; $6618
-_label_09_203:
+	call @loadScriptAndInitGraphics		; $6618
+
+@@state1:
 	call npcAnimate		; $661b
 	call interactionRunScript		; $661e
 	ret nc			; $6621
 	ld a,SND_TELEPORT		; $6622
 	call playSound		; $6624
-	ld hl,$662d		; $6627
+	ld hl,@warpDest		; $6627
 	jp setWarpDestVariables		; $662a
-	add l			; $662d
-.DB $ec				; $662e
-	nop			; $662f
-	rla			; $6630
-	inc bc			; $6631
+
+@warpDest:
+	.db $85 $ec $00 $17 $03
+
+@runSubid03:
+@runSubid04:
+@runSubid05:
+@runSubid06:
 	call checkInteractionState		; $6632
-	jr z,_label_09_204	; $6635
+	jr z,@@state0		; $6635
+
+@@state1:
 	call interactionRunScript		; $6637
 	jp npcAnimate		; $663a
-_label_09_204:
+
+@@state0:
 	call interactionInitGraphics		; $663d
 	call interactionIncState		; $6640
-	ld l,$73		; $6643
-	ld (hl),$33		; $6645
-	ld l,$67		; $6647
+
+	ld l,Interaction.textID+1		; $6643
+	ld (hl),>TX_3300		; $6645
+
+	ld l,collisionRadiusX		; $6647
 	ld (hl),$06		; $6649
-	ld l,$48		; $664b
+	ld l,Interaction.direction		; $664b
 	dec (hl)		; $664d
+
 	ld a,GLOBALFLAG_WATER_POLLUTION_FIXED		; $664e
 	call checkGlobalFlag		; $6650
 	ld b,$00		; $6653
-	jr z,_label_09_205	; $6655
+	jr z,+			; $6655
 	inc b			; $6657
-_label_09_205:
-	ld e,$42		; $6658
++
+	ld e,Interaction.subid		; $6658
 	ld a,(de)		; $665a
 	sub $03			; $665b
 	ld c,a			; $665d
 	add a			; $665e
 	add b			; $665f
-	ld hl,$6695		; $6660
+	ld hl,@data2		; $6660
 	rst_addAToHl			; $6663
-	ld e,$72		; $6664
+	ld e,Interaction.textID		; $6664
 	ld a,(hl)		; $6666
 	ld (de),a		; $6667
+
 	ld a,c			; $6668
 	add a			; $6669
 	add c			; $666a
-	ld hl,$6689		; $666b
+	ld hl,@data1		; $666b
 	rst_addAToHl			; $666e
-	ld e,$66		; $666f
+	ld e,Interaction.collisionRadiusY		; $666f
 	ldi a,(hl)		; $6671
 	ld (de),a		; $6672
-	ld e,$5b		; $6673
+	ld e,Interaction.oamFlagsBackup		; $6673
 	ldi a,(hl)		; $6675
 	ld (de),a		; $6676
 	inc e			; $6677
 	ld (de),a		; $6678
-	ld e,$78		; $6679
+	ld e,Interaction.var38		; $6679
 	ld a,(hl)		; $667b
 	ld (de),a		; $667c
 	call interactionSetAnimation		; $667d
 	call objectSetVisiblec2		; $6680
-	ld hl,script64fc		; $6683
+
+	ld hl,libraryNpcScript_generic		; $6683
 	jp interactionSetScript		; $6686
-	ld (de),a		; $6689
-	ld (bc),a		; $668a
-	ld (bc),a		; $668b
-	ld b,$00		; $668c
-	nop			; $668e
-	ld b,$00		; $668f
-	nop			; $6691
-	ld b,$01		; $6692
-	ld (bc),a		; $6694
-	nop			; $6695
-	ld bc,$0302		; $6696
-	inc b			; $6699
-	dec b			; $669a
-	ld b,$07		; $669b
+
+
+; b0: collisionRadiusY
+; b1: oamFlagsBackup
+; b2: animation (can be thought of as direction to face?)
+@data1:
+	.db $12 $02 $02
+	.db $06 $00 $00
+	.db $06 $00 $00
+	.db $06 $01 $02
+
+; The first and second columns are the text to show before and after the water pollution
+; is fixed, respectively.
+@data2:
+	.db $00 $01
+	.db $02 $03
+	.db $04 $05
+	.db $06 $07 
+
 	call interactionInitGraphics		; $669d
 	jp interactionIncState		; $66a0
+
+@loadScriptAndInitGraphics:
 	call interactionInitGraphics		; $66a3
-	ld e,$42		; $66a6
+	ld e,Interaction.subid		; $66a6
 	ld a,(de)		; $66a8
 	ld hl,@scriptTable		; $66a9
 	rst_addDoubleIndex			; $66ac
@@ -93831,11 +93866,10 @@ _label_09_205:
 	call interactionSetScript		; $66b0
 	jp interactionIncState		; $66b3
 
-; @addr{66b6}
 @scriptTable:
-	.dw script64f0
+	.dw oldManScript_givesShieldUpgrade
 	.dw script64f4
-	.dw script64f8
+	.dw oldManScript_givesFairyPowder
 
 interactionCode53:
 	call checkInteractionState		; $66bc
