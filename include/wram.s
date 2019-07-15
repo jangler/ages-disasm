@@ -524,18 +524,23 @@ wRickyState: ; $c646
 ;     7:
 	db
 wDimitriState: ; $c647
-; bit 1:
-;     2:
+; bit 1: set when dimitri first speaks in cutscene (dee! dee!)
+;     2: set when giving ember seeds to the tokays
+;     5: set when first mounting dimitri
 ;     6: relates to raft
 ;     7:
 	db
 wMooshState: ; $c648
-; bit 5:
-;     6:
+; bit 5: set when first mounting moosh
+;     6: set when moosh leaves after looting cheval's grave
 ;     7:
 	db
 wc649: ; $c649
+; bit 0: set when jumping over the first pits with ricky
+; bit 1: set when jumping up a cliff with ricky
 ; bit 2: set when dimitri is being carried?
+; bit 3: set when reaching the top of a waterfall with dimitri
+; bit 4: set when flying over the first pits with moosh
 ; bit 5: set the first time moosh's buttstomp hits the ground
 	db
 wc64a: ; $c64a
